@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Link } from "react-router-dom";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
@@ -39,12 +39,17 @@ class App extends Component {
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
-              <LinkContainer to="/signup">
-                <NavItem href="/signup">Signup</NavItem>
-              </LinkContainer>
-              <LinkContainer to="/login">
-                <NavItem href="/login">Login</NavItem>
-              </LinkContainer>
+              {this.state.isAuthenticated
+                ? <NavItem onClick={this.handleLogout}>Logout</NavItem>
+                : <Fragment>
+                    <LinkContainer to="/signup">
+                      <NavItem href="/signup">Signup</NavItem>
+                    </LinkContainer>
+                    <LinkContainer to="/login">
+                      <NavItem href="/login">Login</NavItem>
+                    </LinkContainer>
+                  </Fragment>
+              }
             </Nav>
           </Navbar.Collapse>
         </Navbar>
