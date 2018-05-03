@@ -11,6 +11,7 @@ export default class Notes extends Component {
     super(props);
 
     this.file = null;
+    this.attachment = null;
 
     this.state = {
       isLoading: null,
@@ -28,6 +29,7 @@ export default class Notes extends Component {
       const { content, attachment } = note;
 
       if (attachment) {
+        this.attachment = attachment;
         attachmentURL = await Storage.vault.get(attachment);
       }
 
@@ -83,11 +85,10 @@ export default class Notes extends Component {
 
     try {
       if (this.file) {
-        const oldAttachment = (await this.getNote()).attachment;
         attachment = await s3Upload(this.file);
 
-        if (oldAttachment) {
-          await Storage.vault.remove(oldAttachment);
+        if (this.attachment) {
+          await Storage.vault.remove(this.attachment);
         }
       }
 
@@ -102,6 +103,15 @@ export default class Notes extends Component {
     }
   }
 
+  deleteNote() {
+    return Promise.all([
+      API.del("notes", `/notes/${this.props.match.params.id}`),
+      this.attachment
+        ? Storage.vault.remove(this.attachment)
+        : Promise.resolve(null)
+    ]);
+  }
+
   handleDelete = async event => {
     event.preventDefault();
 
@@ -114,6 +124,14 @@ export default class Notes extends Component {
     }
 
     this.setState({ isDeleting: true });
+
+    try {
+      await this.deleteNote();
+      this.props.history.push("/");
+    } catch (e) {
+      alert(e);
+      this.setState({ isDeleting: false });
+    }
   }
 
   render() {
